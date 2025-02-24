@@ -1,0 +1,14 @@
+{
+  "name": "test-cicd",
+  "version": "1.0.0",
+  "description": "A simple Node.js project for CI/CD testing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo 'Build successful!'"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "pm2": "^5.4.3"
+  }
+}
