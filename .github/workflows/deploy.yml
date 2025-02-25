@@ -1,53 +1,28 @@
-name: CI/CD Pipeline
+name: Deploy Node.js App to Server
 
 on:
   push:
     branches:
-      - main
+      - main  # This triggers the workflow on pushes to the 'main' branch
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      
-      - name: Set up Node.js (Example, adjust for your stack)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build Project
-        run: npm run build
-
   deploy:
-    needs: build
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Setup SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to Ubuntu Server
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          export NVM_DIR="$HOME/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # Load NVM
-          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-
-          cd /home/git-user/public/myproject  # Change to your project directory
-          git pull origin main
-          npm install
-          npm run build
-          pm2 restart all  # Restart app if using PM2
-          EOF
+    - name: Deploy to server
+      run: |
+        ssh -o StrictHostKeyChecking=no anandu@65.108.49.72 "
+          cd /home/anandu/test-site/public &&
+          git pull origin main &&
+          npm install &&
+          pm2 restart server.js
+        "
